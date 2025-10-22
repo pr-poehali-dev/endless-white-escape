@@ -18,10 +18,21 @@ export default function Index() {
   const [isMoving, setIsMoving] = useState(false);
   const [frame, setFrame] = useState(0);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [dialogIndex, setDialogIndex] = useState(0);
+  const [displayedText, setDisplayedText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [hasMovedFar, setHasMovedFar] = useState(false);
   
   const keysPressed = useRef<Set<string>>(new Set());
   const animationRef = useRef<number>();
   const lastMoveTime = useRef<number>(0);
+
+  const dialogs = [
+    "Что... что произошло? Где я?",
+    "Как я оказалась здесь...?",
+    "Нужно найти выход отсюда.",
+    "...эмммм... мне кажется это место бесконечное....?"
+  ];
 
   useEffect(() => {
     const audio = new Audio();
@@ -48,8 +59,44 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
+    if (dialogIndex < dialogs.length && !isTyping) {
+      setIsTyping(true);
+      setDisplayedText('');
+      const text = dialogs[dialogIndex];
+      let charIndex = 0;
+
+      const typeInterval = setInterval(() => {
+        if (charIndex < text.length) {
+          setDisplayedText(text.substring(0, charIndex + 1));
+          charIndex++;
+        } else {
+          clearInterval(typeInterval);
+          setIsTyping(false);
+        }
+      }, 50);
+
+      return () => clearInterval(typeInterval);
+    }
+  }, [dialogIndex]);
+
+  useEffect(() => {
+    const distance = Math.sqrt(playerPos.x * playerPos.x + playerPos.y * playerPos.y);
+    if (distance > 1000 && !hasMovedFar && dialogIndex === 2) {
+      setHasMovedFar(true);
+      setDialogIndex(3);
+    }
+  }, [playerPos, hasMovedFar, dialogIndex]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
+      
+      if (key === 'z' && !isTyping && dialogIndex < 2) {
+        e.preventDefault();
+        setDialogIndex(prev => prev + 1);
+        return;
+      }
+      
       if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
         e.preventDefault();
         keysPressed.current.add(key);
@@ -68,7 +115,7 @@ export default function Index() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [isTyping, dialogIndex]);
 
   useEffect(() => {
     const movePlayer = () => {
@@ -211,12 +258,24 @@ export default function Index() {
         />
       </div>
 
-      <div 
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-black text-white pointer-events-none select-none"
-        style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '14px' }}
-      >
-        Выхода нет. Только белое пространство.
-      </div>
+      {dialogIndex < dialogs.length && (
+        <div 
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white border-4 border-black px-8 py-6 select-none"
+          style={{ 
+            fontFamily: "'IBM Plex Mono', monospace", 
+            fontSize: '16px',
+            minWidth: '500px',
+            maxWidth: '600px'
+          }}
+        >
+          <div className="text-black mb-2">{displayedText}</div>
+          {!isTyping && dialogIndex < 2 && (
+            <div className="text-right text-gray-500 text-sm animate-pulse">
+              [Z для продолжения]
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
