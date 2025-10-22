@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const SPRITE_SIZE = 48;
+const SPRITE_SIZE = 64;
 const ANIMATION_SPEED = 150;
 
 type Direction = 'down' | 'left' | 'right' | 'up';
