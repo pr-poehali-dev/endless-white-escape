@@ -6,10 +6,10 @@ const ANIMATION_SPEED = 150;
 type Direction = 'down' | 'left' | 'right' | 'up';
 
 const SPRITE_POSITIONS = {
-  down: [0, 1, 2, 3],
-  left: [4, 5, 6, 7],
-  right: [8, 9, 10, 11],
-  up: [12, 13, 14, 15]
+  down: [0, 4, 8, 12],
+  right: [1, 5, 9, 13],
+  left: [2, 6, 10, 14],
+  up: [3, 7, 11, 15]
 };
 
 export default function Index() {
@@ -128,8 +128,8 @@ export default function Index() {
   }, [direction]);
 
   const spriteIndex = isMoving ? SPRITE_POSITIONS[direction][frame] : SPRITE_POSITIONS[direction][0];
-  const spriteRow = Math.floor(spriteIndex / 4);
-  const spriteCol = spriteIndex % 4;
+  const spriteCol = Math.floor(spriteIndex / 4);
+  const spriteRow = spriteIndex % 4;
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-white">
