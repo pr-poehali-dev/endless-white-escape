@@ -191,11 +191,12 @@ export default function Index() {
       </div>
 
       <div 
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 z-10"
         style={{
           width: `${SPRITE_SIZE}px`,
           height: `${SPRITE_SIZE}px`,
           imageRendering: 'pixelated',
+          transform: `translateX(-50%) translateY(-${SPRITE_SIZE}px)`,
         }}
       >
         <div
