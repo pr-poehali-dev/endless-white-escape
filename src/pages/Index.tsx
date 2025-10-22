@@ -22,6 +22,8 @@ export default function Index() {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [hasMovedFar, setHasMovedFar] = useState(false);
+  const [hasMovedVeryFar, setHasMovedVeryFar] = useState(false);
+  const [showDialog, setShowDialog] = useState(true);
   
   const keysPressed = useRef<Set<string>>(new Set());
   const animationRef = useRef<number>();
@@ -31,7 +33,10 @@ export default function Index() {
     "Что... что произошло? Где я?",
     "Как я оказалась здесь...?",
     "Нужно найти выход отсюда.",
-    "...эмммм... мне кажется это место бесконечное....?"
+    "...эмммм... мне кажется это место бесконечное....?",
+    "фухххх... ухххх",
+    "я не чувствую своих ног....",
+    "у этом месте есть вообще граница???"
   ];
 
   useEffect(() => {
@@ -83,17 +88,29 @@ export default function Index() {
     const distance = Math.sqrt(playerPos.x * playerPos.x + playerPos.y * playerPos.y);
     if (distance > 1000 && !hasMovedFar && dialogIndex === 2) {
       setHasMovedFar(true);
+      setShowDialog(true);
       setDialogIndex(3);
     }
-  }, [playerPos, hasMovedFar, dialogIndex]);
+    if (distance > 4000 && !hasMovedVeryFar && dialogIndex >= 3) {
+      setHasMovedVeryFar(true);
+      setShowDialog(true);
+      setDialogIndex(4);
+    }
+  }, [playerPos, hasMovedFar, hasMovedVeryFar, dialogIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
       
-      if (key === 'z' && !isTyping && dialogIndex < 2) {
+      if (key === 'z' && !isTyping && showDialog) {
         e.preventDefault();
-        setDialogIndex(prev => prev + 1);
+        if (dialogIndex < 2) {
+          setDialogIndex(prev => prev + 1);
+        } else if (dialogIndex >= 4 && dialogIndex < 6) {
+          setDialogIndex(prev => prev + 1);
+        } else {
+          setShowDialog(false);
+        }
         return;
       }
       
@@ -258,7 +275,7 @@ export default function Index() {
         />
       </div>
 
-      {dialogIndex < dialogs.length && (
+      {showDialog && dialogIndex < dialogs.length && (
         <div 
           className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white border-4 border-black px-8 py-6 select-none"
           style={{ 
@@ -269,9 +286,14 @@ export default function Index() {
           }}
         >
           <div className="text-black mb-2">{displayedText}</div>
-          {!isTyping && dialogIndex < 2 && (
+          {!isTyping && ((dialogIndex < 2) || (dialogIndex >= 4 && dialogIndex < 6)) && (
             <div className="text-right text-gray-500 text-sm animate-pulse">
               [Z для продолжения]
+            </div>
+          )}
+          {!isTyping && (dialogIndex === 2 || dialogIndex === 3 || dialogIndex === 6) && (
+            <div className="text-right text-gray-500 text-sm animate-pulse">
+              [Z чтобы закрыть]
             </div>
           )}
         </div>
